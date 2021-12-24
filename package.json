@@ -1,0 +1,23 @@
+{
+  "name": "mentoree-backend",
+  "version": "1.0.0",
+  "description": "dahlah males",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/irvanhanif/Mentoree-Backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/irvanhanif/Mentoree-Backend/issues"
+  },
+  "homepage": "https://github.com/irvanhanif/Mentoree-Backend#readme",
+  "dependencies": {
+    "express": "^4.17.2"
+  }
+}
