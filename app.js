@@ -4,6 +4,7 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 4500;
 
+const routerMentee = require('./api/mentee/mentee.router');
 const routerSubject = require('./api/subject/subject.router');
 
 app.use(express.json());
@@ -13,6 +14,7 @@ app.get('/', (req, res) => {
     res.send("its work");
 });
 
+app.use('/mentee', routerMentee);
 app.use('/subject', routerSubject);
 
 app.listen(port, () => {
