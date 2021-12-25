@@ -56,5 +56,16 @@ module.exports = {
                 return callback(null, result.rows);
             }
         );
+    },
+    getMentorWithIdSubject: (req, callback) => {
+        connection.query(
+            `SELECT * FROM ${tablename} WHERE "id_subject" = $1`,
+            [req],
+            (error, result) => {
+                if(error) return callback(error);
+
+                return callback(null, result.rows);
+            }
+        );
     }
 }
