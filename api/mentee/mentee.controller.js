@@ -21,7 +21,8 @@ module.exports = {
         getMentee(req.params.id, (error, result) => {
             if(error) return ERROR(res, 500, error);
 
-            if(result == null) return ERROR(res, 404, "data not found");
+            console.log(result)
+            if(result.length == 0) return ERROR(res, 404, "data not found");
             delete result[0].password;
             return SUCCESS(res, 200, result);
         });
@@ -40,7 +41,7 @@ module.exports = {
         getMenteeByEmail(req.body.email, (error, result) => {
             if(error) return ERROR(res, 500, error);
 
-            if(result[0] == null) return ERROR(res, 404, "account not found or incorrect email");
+            if(result.length == 0) return ERROR(res, 404, "account not found or incorrect email");
             const verif = compareSync(req.body.password, result[0].password);
             if(!verif) return ERROR(res, 403, "incorrect password");
 
