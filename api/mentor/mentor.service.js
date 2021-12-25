@@ -13,7 +13,7 @@ module.exports = {
             }
         );
     },
-    getMentor: (req, res) => {
+    getMentor: (req, callback) => {
         connection.query(
             `SELECT * FROM ${tablename} WHERE "id_mentor" = $1`,
             [req],
@@ -24,7 +24,7 @@ module.exports = {
             }
         );
     },
-    postMentor: (req, res) => {
+    postMentor: (req, callback) => {
         connection.query(
             `INSERT INTO ${tablename} ("nama", "email", "password", "alamat",
             "pekerjaan", "id_subject", "background", "tarif") VALUES 
