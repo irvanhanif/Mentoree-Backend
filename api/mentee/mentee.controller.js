@@ -46,7 +46,7 @@ module.exports = {
 
             delete result[0].password;
             result[0]["token"] = sign({mentee: result}, "HS256", {expiresIn: "60m"});
-            return SUCCESS(res, 200, result)
+            return SUCCESS(res, 200, result);
         });
     }
 }

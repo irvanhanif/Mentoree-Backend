@@ -5,6 +5,7 @@ const app = express();
 const port = process.env.PORT || 4500;
 
 const routerMentee = require('./api/mentee/mentee.router');
+const routerMentor = require('./api/mentor/mentor.router');
 const routerSubject = require('./api/subject/subject.router');
 
 app.use(express.json());
@@ -15,6 +16,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/mentee', routerMentee);
+app.use('/mentor', routerMentor);
 app.use('/subject', routerSubject);
 
 app.listen(port, () => {
