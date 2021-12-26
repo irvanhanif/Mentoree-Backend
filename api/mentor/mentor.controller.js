@@ -27,10 +27,14 @@ module.exports = {
         postMentor(req.body, (error, result) => {
             if(error) return ERROR(res, 500, error);
 
-            delete result[0].password;
-            result[0]["token"] = sign({mentor: result}, "HS256", {expiresIn: "60m"});
-            return SUCCESS(res, 200, result);
-        })
+            getMentor(result.id_mentor, (errors, results) => {
+                if(errors) return ERROR(res, 500, errors);
+
+                delete results[0].password;
+                results[0]["token"] = sign({mentor: results}, "HS256", {expiresIn: "60m"});
+                return SUCCESS(res, 200, results);
+            });
+        });
     },
     login: (req, res) => {
         getMentorWithEmail(req.body.email, (error, result) => {
