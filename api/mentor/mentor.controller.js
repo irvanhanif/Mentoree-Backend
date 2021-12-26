@@ -27,7 +27,7 @@ module.exports = {
         postMentor(req.body, (error, result) => {
             if(error) return ERROR(res, 500, error);
 
-            getMentor(result.id_mentor, (errors, results) => {
+            getMentor(result[0].id_mentor, (errors, results) => {
                 if(errors) return ERROR(res, 500, errors);
 
                 delete results[0].password;
