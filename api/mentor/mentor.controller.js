@@ -1,4 +1,4 @@
-const { getAllMentor, getMentor, getMentorWithEmail, postMentor } = require('./mentor.service');
+const { getAllMentor, getMentor, getMentorWithEmail, postMentor, deleteMentor, updateMentor } = require('./mentor.service');
 const { ERROR, SUCCESS } = require('../respon');
 const { compareSync, genSaltSync, hashSync } = require('bcryptjs');
 const { sign } = require('jsonwebtoken');
@@ -47,6 +47,21 @@ module.exports = {
             delete result[0].password;
             result[0]["token"] = sign({mentor: result}, "HS256", {expiresIn: "60m"});
             return SUCCESS(res, 200, result);
-        })
+        });
+    },
+    deleteAccount: (req, res) => {
+        deleteMentor(req.params.id, (error, result) => {
+            if(error) return ERROR(res, 500, error);
+
+            return SUCCESS(res, 200, result);
+        });
+    },
+    updateAccount: (req, res) => {
+        req.body.id_mentor = req.params.id;
+        updateMentor(req.body, (error, result) => {
+            if(error) return ERROR(res, 500, error);
+
+            return SUCCESS(res, 200, result);
+        });
     }
 }

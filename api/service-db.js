@@ -1,5 +1,4 @@
 const Pool = require('pg').Pool;
-const dotenv = require('dotenv').config();
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 const connection = new Pool({
