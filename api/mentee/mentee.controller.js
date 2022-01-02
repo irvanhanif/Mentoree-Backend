@@ -6,7 +6,6 @@ const {
 const { ERROR, SUCCESS } = require('../respon');
 const { compareSync, genSaltSync, hashSync } = require('bcryptjs');
 const {sign} = require('jsonwebtoken');
-const cache = require('../cache');
 
 const salt = genSaltSync(10);
 
@@ -115,9 +114,11 @@ module.exports = {
             ActivateAccount(decoded.id_mentee, (error, result) => {
                 if(error) return ERROR(res, 500, error);
 
-                getMentee(decoded.id_mentee, (error, result) => {
-                    result[0]["token"] = sign({mentee: result}, "HS256", {expiresIn: "60m"});
-                    return SUCCESS(res, 200, result);
+                getMentee(decoded.id_mentee, (errors, results) => {
+                    if(errors) return ERROR(res, 500, errors);
+
+                    results[0]["token"] = sign({mentee: results}, "HS256", {expiresIn: "60m"});
+                    return SUCCESS(res, 200, results);
                 });
             });
         });
