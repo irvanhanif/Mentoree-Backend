@@ -89,7 +89,6 @@ module.exports = {
         );
     },
     verifAccount: (req, callback) => {
-        console.log(req)
         const data = sign({id_mentee: req.id_mentee, active: true}, "HS256", {expiresIn: "20m"});
         const option = {
             from: '"No-Reply Mentoree" <mentoree123@gmail.com>',
@@ -121,7 +120,7 @@ module.exports = {
     },
     ActivateAccount: (req, callback) => {
         connection.query(
-            `UPDATE ${tablename} SET kode = $2 WHERE id_mentee = $1 RETURNING *`,
+            `UPDATE ${tablename} SET active = $2 WHERE id_mentee = $1 RETURNING *`,
             [
                 req.id_mentee,
                 true

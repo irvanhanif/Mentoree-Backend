@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const { getAllMentor, getMentor, register, login, deleteAccount, updateAccount } = require('./mentor.controller');
+const { accountToken, mentorToken } = require('../middleware');
 
 router.get('/', getAllMentor);
 router.get('/:id', getMentor);

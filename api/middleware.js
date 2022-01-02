@@ -9,19 +9,19 @@ module.exports = {
         token = token.slice(7);
         verify(token, "HS256", (error, decoded) => {
             if(error) return ERROR(res, 500, error);
-            if(!decoded.mentor.id_mentor || !decoded.mentee.id_mentee) return ERROR(res, 500, "Account is not Mentor or Mentee");
+            if(!(decoded.mentor[0].id_mentor || decoded.mentee[0].id_mentee)) return ERROR(res, 500, "Account is not Mentor or Mentee");
             
             req.decoded = decoded;
             next();
         });
     },
     mentorToken: (req, res, next) => {
-        if(!req.decoded.mentor.id_mentor) return ERROR(res, 500, "Account is not Mentor");
+        if(!req.decoded.mentor[0].id_mentor) return ERROR(res, 500, "Account is not Mentor");
 
         next();
     },
     menteeToken: (req, res, next) => {
-        if(!req.decoded.mentee.id_mentee) return ERROR(res, 500, "Account is not Mentee");
+        if(!req.decoded.mentee[0].id_mentee) return ERROR(res, 500, "Account is not Mentee");
         
         next();
     }

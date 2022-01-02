@@ -5,7 +5,7 @@ const {
 } = require('./mentee.service');
 const { ERROR, SUCCESS } = require('../respon');
 const { compareSync, genSaltSync, hashSync } = require('bcryptjs');
-const {sign} = require('jsonwebtoken');
+const {sign, verify} = require('jsonwebtoken');
 
 const salt = genSaltSync(10);
 
@@ -42,6 +42,7 @@ module.exports = {
                 delete results[0].password;
                 if(!results[0]) return ERROR(res, 403, "Account does'nt record");
                 verifAccount(results[0], (errors1, results1) => {
+                    console.log('tesing')
                     if(errors1) return ERROR(res, 500, errors1);
 
                     if(results1.length == 0) return ERROR(res, 500, "Something wrong when send email");
@@ -92,9 +93,9 @@ module.exports = {
         });
     },
     inputCode: (req, res) => {
-        if(req.body.data.kode != req.body.kode) return ERROR(res, 500, "Code is incorrect");
-
-        ActivateAccount(req.body.data.id_mentee, (error, result) => {
+        if(req.body.data[0].kode != req.body.kode) return ERROR(res, 500, "Code is incorrect");
+        
+        ActivateAccount(req.body.data[0], (error, result) => {
             if(error) return ERROR(res, 500, error);
 
             const data = req.body.data;
@@ -105,20 +106,18 @@ module.exports = {
     inputToken: (req, res) => {
         let token = req.params.token;
         if(!token) return ERROR(res, 500, "Access Denied");
-
-        token = token.slice(7);
         verify(token, "HS256", (error, decoded) => {
             if(error) return ERROR(res, 500, error);
+
             if(!decoded.id_mentee) return ERROR(res, 500, "Account is not Mentee");
+            ActivateAccount(decoded, (errors, results) => {
+                if(errors) return ERROR(res, 500, errors);
 
-            ActivateAccount(decoded.id_mentee, (error, result) => {
-                if(error) return ERROR(res, 500, error);
+                getMentee(decoded.id_mentee, (errors1, results1) => {
+                    if(errors1) return ERROR(res, 500, errors1);
 
-                getMentee(decoded.id_mentee, (errors, results) => {
-                    if(errors) return ERROR(res, 500, errors);
-
-                    results[0]["token"] = sign({mentee: results}, "HS256", {expiresIn: "60m"});
-                    return SUCCESS(res, 200, results);
+                    results1[0]["token"] = sign({mentee: results1}, "HS256", {expiresIn: "60m"});
+                    return SUCCESS(res, 200, results1);
                 });
             });
         });
