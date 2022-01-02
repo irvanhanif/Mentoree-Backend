@@ -31,7 +31,6 @@ module.exports = {
         for(let i = 0 ; i < 4 ; i++){
             code += Math.round(Math.random()*9);
         }
-        console.log(code)
         connection.query(
             `INSERT INTO ${tablename} (nama, email, password, status, kode)
             VALUES ($1, $2, $3, $4, $5) RETURNING *`,
@@ -96,8 +95,8 @@ module.exports = {
             from: '"No-Reply Mentoree" <mentoree123@gmail.com>',
             to: req.email,
             subject: "Activate Account",
-            html: `hello, ${req.nama}... you have been completed form to create account, and then you can activate your account with input code which are we share to you or just click link and your account is active.<br>
-            here is your code ${req.kode} <br> or you can click this link for activate your account<br> link/${data}`
+            html: `hello, ${req.nama}...<br><br> you have been completed form to create account, and then you can activate your account with input code which are we share to you or just click link and your account is active.<br>
+            here is your code <b>${req.kode}<b> <br> or you can click this link before 20 minutes for activate your account<br> link/${data}`
         };
 
         transporter.sendMail(option, (error, result) => {
@@ -119,5 +118,19 @@ module.exports = {
 
             return callback(null, result.response);
         });
+    },
+    ActivateAccount: (req, callback) => {
+        connection.query(
+            `UPDATE ${tablename} SET kode = $2 WHERE id_mentee = $1 RETURNING *`,
+            [
+                req.id_mentee,
+                true
+            ],
+            (error, result) => {
+                if(error) return callback(error);
+
+                return callback(null, result.rows);
+            }
+        );
     }
 }

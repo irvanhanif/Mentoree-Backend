@@ -1,6 +1,7 @@
 const { 
     getAllMentee, getMentee, postMentee, getMenteeByEmail, 
-    deleteMentee, updateMentee, forgotPassword, verifAccount 
+    deleteMentee, updateMentee, forgotPassword, verifAccount,
+    ActivateAccount 
 } = require('./mentee.service');
 const { ERROR, SUCCESS } = require('../respon');
 const { compareSync, genSaltSync, hashSync } = require('bcryptjs');
@@ -11,41 +12,24 @@ const salt = genSaltSync(10);
 
 module.exports = {
     getAllMentee: (req, res) => {
-        if(cache.get('mentee')){
-            return SUCCESS(res, 200, cache.get('mentee'));
-        }else{
-            getAllMentee((errors, results) => {
-                if(errors) return ERROR(res, 500, errors);
+        getAllMentee((errors, results) => {
+            if(errors) return ERROR(res, 500, errors);
         
-                if(results.length == 0) return ERROR(res, 403, "no data available");
-                for(let i = 0; i < results.length; i++) {
-                    delete results[i].password;
-                }
-                cache.set('mentee', results);
-                return SUCCESS(res, 200, results);
-            });
-        }
+            if(results.length == 0) return ERROR(res, 403, "no data available");
+            for(let i = 0; i < results.length; i++) {
+                delete results[i].password;
+            }
+            return SUCCESS(res, 200, results);
+        });
     },
     getMentee: (req, res) => {
-        if(cache.get('mentee')){
-            const data = cache.get('mentee');
-            for(let i = 0; i < data.length; i++){
-                if(data[i].id_mentee == req.params.id){
-                    const subdata = [];
-                    subdata.push(data[i]);
-                    cache.set('mentee', data);
-                    return SUCCESS(res, 200, subdata);
-                }
-            }
-        }else{
-            getMentee(req.params.id, (error, result) => {
-                if(error) return ERROR(res, 500, error);
+        getMentee(req.params.id, (error, result) => {
+            if(error) return ERROR(res, 500, error);
     
-                if(result.length == 0) return ERROR(res, 404, "data not found");
-                delete result[0].password;
-                return SUCCESS(res, 200, result);
-            });
-        }
+            if(result.length == 0) return ERROR(res, 404, "data not found");
+            delete result[0].password;
+            return SUCCESS(res, 200, result);
+        });
     },
     register: (req, res) => {
         getMenteeByEmail(req.body.email, (error, result) => {
@@ -56,22 +40,13 @@ module.exports = {
             postMentee(req.body, (errors, results) => {
                 if(errors) return ERROR(res, 500, errors);
     
-                // delete results[0].password;
-                // results[0]["token"] = sign({mentee: results}, "HS256", {expiresIn: "60m"});
-                // return SUCCESS(res, 200, results);
+                delete results[0].password;
                 if(!results[0]) return ERROR(res, 403, "Account does'nt record");
-                getAllMentee((errors1, results1) => {
+                verifAccount(results[0], (errors1, results1) => {
                     if(errors1) return ERROR(res, 500, errors1);
-            
-                    for(let i = 0; i < results1.length; i++) {
-                        delete results1[i].password;
-                    }
-                    cache.set('mentee', results1);
-                });
-                verifAccount(results[0], (errors2, results2) => {
-                    if(errors2) return ERROR(res, 500, errors2);
 
-                    return SUCCESS(res, 200, results2);
+                    if(results1.length == 0) return ERROR(res, 500, "Something wrong when send email");
+                    return SUCCESS(res, 200, results);
                 })
             });
         });
@@ -115,6 +90,36 @@ module.exports = {
             if(error) return ERROR(res, 500, error);
 
             return SUCCESS(res, 200, result);
+        });
+    },
+    inputCode: (req, res) => {
+        if(req.body.data.kode != req.body.kode) return ERROR(res, 500, "Code is incorrect");
+
+        ActivateAccount(req.body.data.id_mentee, (error, result) => {
+            if(error) return ERROR(res, 500, error);
+
+            const data = req.body.data;
+            data[0]["token"] = sign({mentee: data}, "HS256", {expiresIn: "60m"});
+            return SUCCESS(res, 200, data);
+        })
+    },
+    inputToken: (req, res) => {
+        let token = req.params.token;
+        if(!token) return ERROR(res, 500, "Access Denied");
+
+        token = token.slice(7);
+        verify(token, "HS256", (error, decoded) => {
+            if(error) return ERROR(res, 500, error);
+            if(!decoded.id_mentee) return ERROR(res, 500, "Account is not Mentee");
+
+            ActivateAccount(decoded.id_mentee, (error, result) => {
+                if(error) return ERROR(res, 500, error);
+
+                getMentee(decoded.id_mentee, (error, result) => {
+                    result[0]["token"] = sign({mentee: result}, "HS256", {expiresIn: "60m"});
+                    return SUCCESS(res, 200, result);
+                });
+            });
         });
     }
 }
