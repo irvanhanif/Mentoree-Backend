@@ -1,8 +1,10 @@
 const connection = require('../service-db');
 const transporter = require('../nodemailer');
 const { sign } = require('jsonwebtoken');
+const { hashSync, genSaltSync } = require('bcryptjs');
 
 const tablename = "mentee";
+const salt = genSaltSync(10);
 
 module.exports = {
     getAllMentee: (callback) => {
@@ -31,20 +33,24 @@ module.exports = {
         for(let i = 0 ; i < 4 ; i++){
             code += Math.round(Math.random()*9);
         }
+        code = hashSync(code, salt);
         connection.query(
-            `INSERT INTO ${tablename} (nama, email, password, status, kode)
-            VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+            `INSERT INTO ${tablename} (nama, email, password, status, kode, active)
+            VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
             [
                 req.nama,
                 req.email,
                 req.password,
                 req.status,
-                code
+                code,
+                false
             ],
             (error, result) => {
                 if(error) return callback(error);
 
-                return callback(null, result.rows);
+                result = result.rows;
+                result[0].code = code;
+                return callback(null, result);
             }
         );
     },
@@ -89,13 +95,13 @@ module.exports = {
         );
     },
     verifAccount: (req, callback) => {
-        const data = sign({id_mentee: req.id_mentee, active: true}, "HS256", {expiresIn: "20m"});
+        const data = sign(req, process.env.KEY, {algorithm: "HS256", expiresIn: "20m"});
         const option = {
             from: '"No-Reply Mentoree" <mentoree123@gmail.com>',
             to: req.email,
             subject: "Activate Account",
             html: `hello, ${req.nama}...<br><br> you have been completed form to create account, and then you can activate your account with input code which are we share to you or just click link and your account is active.<br>
-            here is your code <b>${req.kode}<b> <br> or you can click this link before 20 minutes for activate your account<br> link/${data}`
+            here is your code <b>${req.code}<b> <br> or you can click this link before 20 minutes for activate your account<br> link/${data}`
         };
 
         transporter.sendMail(option, (error, result) => {
@@ -122,7 +128,7 @@ module.exports = {
         connection.query(
             `UPDATE ${tablename} SET active = $2 WHERE id_mentee = $1 RETURNING *`,
             [
-                req.id_mentee,
+                req,
                 true
             ],
             (error, result) => {

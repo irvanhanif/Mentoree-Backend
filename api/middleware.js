@@ -7,7 +7,7 @@ module.exports = {
         if(!token) return ERROR(res, 500, "Access Denied");
         
         token = token.slice(7);
-        verify(token, "HS256", (error, decoded) => {
+        verify(token, process.env.KEY, {algorithms: "HS256"}, (error, decoded) => {
             if(error) return ERROR(res, 500, error);
             if(!(decoded.mentor[0].id_mentor || decoded.mentee[0].id_mentee)) return ERROR(res, 500, "Account is not Mentor or Mentee");
             
