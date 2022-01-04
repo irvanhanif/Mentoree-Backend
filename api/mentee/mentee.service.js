@@ -95,7 +95,7 @@ module.exports = {
         );
     },
     verifAccount: (req, callback) => {
-        const data = sign(req, process.env.KEY, {algorithm: "HS256", expiresIn: "20m"});
+        const data = sign({mentee: req, active: true}, process.env.KEY, {algorithm: "HS256", expiresIn: "20m"});
         const option = {
             from: '"No-Reply Mentoree" <mentoree123@gmail.com>',
             to: req.email,
@@ -114,18 +114,37 @@ module.exports = {
         });
     },
     forgotPassword: (req, callback) => {
+        let code = '';
+        for(let i = 0 ; i < 4 ; i++){
+            code += Math.round(Math.random()*9);
+        }
+        const codeHash = hashSync(code, salt);
+
+        const data = sign({mentee: req, active: true}, process.env.KEY, {algorithm: "HS256", expiresIn: "20m"});
         const option = {
             from: '"No-Reply Mentoree" <mentoree123@gmail.com>',
             to: req.email,
             subject: "Forgot Password",
-            html: "ini kodemu ... <br>harap input sebelum 20 menit"
+            html: `<h4>here is your code <b>${code}<b><h4><br> 
+            <h4>or you can click this link before 20 minutes for activate your account<br> link/${data}<h4>`
         };
+        connection.query(
+            `UPDATE ${tablename} SET kode = $2 WHERE id_mentee = $1 RETURNING *`,
+            [
+                req.id_mentee,
+                codeHash
+            ],
+            (error, result) => {
+                if(error) return callback(error);
 
-        transporter.sendMail(option, (error, result) => {
-            if(error) return callback(error);
+                transporter.sendMail(option, (errors, results) => {
+                    if(errors) return callback(errors);
 
-            return callback(null, result.response);
-        });
+                    if(results.response.length == 0) return ERROR(res, 500, "Something wrong when send email");
+                    return callback(null, result);
+                });
+            }
+        );
     },
     ActivateAccount: (req, callback) => {
         connection.query(
@@ -140,5 +159,43 @@ module.exports = {
                 return callback(null, result.rows);
             }
         );
+    },
+    resendToken: (req, callback) => {
+        let code = '';
+        for(let i = 0 ; i < 4 ; i++){
+            code += Math.round(Math.random()*9);
+        }
+        const codeHash = hashSync(code, salt);
+
+        connection.query(
+            `UPDATE ${tablename} SET kode = $2 WHERE id_mentee = $1 RETURNING *`,
+            [
+                req.id_mentee,
+                codeHash
+            ],
+            (error, result) => {
+                if(error) return callback(error);
+ 
+                delete result[0].password;
+                delete result[0].kode;
+                const data = sign({mentee: result, active: true}, process.env.KEY, {algorithm: "HS256", expiresIn: "20m"});
+                const option = {
+                    from: '"No-Reply Mentoree" <mentoree123@gmail.com>',
+                    to: result.email,
+                    subject: "Activate Account",
+                    html: `<h4>hello, ${result.nama}...<h4><br><br>
+                    
+                    <h4>you have been completed form to create account, and then you can activate your account with input code which are we share to you or just click link and your account is active.<h4><br>
+                    <h4>here is your code <b>${code}<b><h4><br> 
+                    <h4>or you can click this link before 20 minutes for activate your account<br> link/${data}<h4>`
+                };
+                transporter.sendMail(option, (errors, results) => {
+                    if(errors) return callback(errors);
+
+                    if(results.response.length == 0) return ERROR(res, 500, "Something wrong when send email");
+                    return callback(null, result.rows);
+                });
+            }
+        )
     }
 }
