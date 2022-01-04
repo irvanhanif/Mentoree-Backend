@@ -33,7 +33,7 @@ module.exports = {
         for(let i = 0 ; i < 4 ; i++){
             code += Math.round(Math.random()*9);
         }
-        code = hashSync(code, salt);
+        const codeHash = hashSync(code, salt);
         connection.query(
             `INSERT INTO ${tablename} (nama, email, password, status, kode, active)
             VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
@@ -42,7 +42,7 @@ module.exports = {
                 req.email,
                 req.password,
                 req.status,
-                code,
+                codeHash,
                 false
             ],
             (error, result) => {
@@ -100,8 +100,11 @@ module.exports = {
             from: '"No-Reply Mentoree" <mentoree123@gmail.com>',
             to: req.email,
             subject: "Activate Account",
-            html: `hello, ${req.nama}...<br><br> you have been completed form to create account, and then you can activate your account with input code which are we share to you or just click link and your account is active.<br>
-            here is your code <b>${req.code}<b> <br> or you can click this link before 20 minutes for activate your account<br> link/${data}`
+            html: `<h4>hello, ${req.nama}...<h4><br><br>
+            
+            <h4>you have been completed form to create account, and then you can activate your account with input code which are we share to you or just click link and your account is active.<h4><br>
+            <h4>here is your code <b>${req.code}<b><h4><br> 
+            <h4>or you can click this link before 20 minutes for activate your account<br> link/${data}<h4>`
         };
 
         transporter.sendMail(option, (error, result) => {

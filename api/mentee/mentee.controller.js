@@ -40,17 +40,18 @@ module.exports = {
             req.body.password = hashSync(req.body.password, salt);
             postMentee(req.body, (errors, results) => {
                 if(errors) return ERROR(res, 500, errors);
-                console.log('post '+results)
+                
                 delete results[0].password;
                 if(!results[0]) return ERROR(res, 403, "Account does'nt record");
                 verifAccount(results[0], (errors1, results1) => {
                     if(errors1) return ERROR(res, 500, errors1);
-                    console.log('verif '+results1)
+                    
                     if(results1.length == 0) return ERROR(res, 500, "Something wrong when send email");
                     
-                    results[0]["token"] = sign({mentee: result}, process.env.KEY, {algorithm: "HS256", expiresIn: "24h"});
-                    return SUCCESS(res, 200, result);
-                })
+                    delete results[0].code;
+                    results[0].token = sign({mentee: results}, process.env.KEY, {algorithm: "HS256", expiresIn: "20m"});
+                    return SUCCESS(res, 200, results);
+                });
             });
         });
     },
@@ -100,15 +101,15 @@ module.exports = {
         token = token.slice(7);
         verify(token, process.env.KEY, {algorithms: "HS256"}, (error, decoded) => {
             if(error) return ERROR(res, 500, error);
-            console.log('decoded '+decoded)
-            const verif = compareSync(req.body.kode, decoded.mentee[0].code);
+            
+            const verif = compareSync(req.body.kode, decoded.mentee[0].kode);
             if(!verif) return ERROR(res, 500, "Code is incorrect");
             
             ActivateAccount(decoded.mentee[0].id_mentee, (errors, result) => {
                 if(errors) return ERROR(res, 500, errors);
-                console.log(result)
+                
                 if(!result) return ERROR(res, 500, "Something wrong when activate accoung");
-                getMentee(req.body.id_mentee, (errors1, results) => {
+                getMentee(decoded.mentee[0].id_mentee, (errors1, results) => {
                     if(errors1) return ERROR(res, 500, errors1);
 
                     delete results[0].password;
@@ -123,21 +124,32 @@ module.exports = {
         const token = req.params.token;
         verify(token, process.env.KEY, {algorithms: "HS256"}, (error, decoded) => {
             if(error) return ERROR(res, 500, error);
-            console.log('decoded '+decoded)
-            if(!decoded[0].id_mentee) return ERROR(res, 500, "Account is not Mentee");
-            ActivateAccount(decoded[0].id_mentee, (errors, results) => {
+            
+            if(!decoded.id_mentee) return ERROR(res, 500, "Account is not Mentee");
+            ActivateAccount(decoded.id_mentee, (errors, results) => {
                 if(errors) return ERROR(res, 500, errors);
-                console.log('active '+results)
+                
                 if(!results) return ERROR(res, 500, "Something wrong when activate accoung");
-                getMentee(decoded[0].id_mentee, (errors1, results1) => {
+                getMentee(decoded.id_mentee, (errors1, results1) => {
                     if(errors1) return ERROR(res, 500, errors1);
 
-                    delete results[0].password;
-                    delete results[0].kode;
+                    delete results1[0].password;
+                    delete results1[0].kode;
                     results1[0]["token"] = sign({mentee: results1}, process.env.KEY, {algorithm: "HS256", expiresIn: "24h"});
                     return SUCCESS(res, 200, results1);
                 });
             });
+        });
+    },
+    resendKodeToken: (req, res) => {
+        verifAccount(req.body, (error, result) => {
+            if(error) return ERROR(res, 500, error);
+            
+            if(result.length == 0) return ERROR(res, 500, "Something wrong when send email");
+            
+            delete result[0].code;
+            result[0].token = sign({mentee: result}, process.env.KEY, {algorithm: "HS256", expiresIn: "20m"});
+            return SUCCESS(res, 200, result);
         });
     }
 }
