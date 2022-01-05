@@ -8,7 +8,7 @@ const { compareSync, genSaltSync, hashSync } = require('bcryptjs');
 const {sign, verify} = require('jsonwebtoken');
 
 const salt = genSaltSync(10);
-const token;
+const token = '';
 
 module.exports = {
     getAllMentee: (req, res) => {
