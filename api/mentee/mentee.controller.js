@@ -63,7 +63,7 @@ module.exports = {
     login: (req, res) => {
         getMenteeByEmail(req.body.email, (error, result) => {
             if(error) return ERROR(res, 500, error);
-
+            
             if(result.length == 0) return ERROR(res, 404, "account not found or incorrect email");
             if(!result[0].active) return ERROR(res, 500, "account isn't active");
             const verif = compareSync(req.body.password, result[0].password);
