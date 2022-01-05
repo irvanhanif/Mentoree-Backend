@@ -24,7 +24,8 @@ module.exports = {
         });
     },
     getMentee: (req, res) => {
-        if(!req.decoded.mentee[0].id_mentee == req.params.id) return ERROR(res, 403, "id request doesnt match with id mentee");
+        if(req.decoded.mentee[0].id_mentee != req.params.id) return ERROR(res, 403, "id request doesnt match with id mentee");
+        
         getMentee(req.params.id, (error, result) => {
             if(error) return ERROR(res, 500, error);
     
@@ -73,7 +74,8 @@ module.exports = {
         });
     },
     deleteAccount: (req, res) => {
-        if(!req.decoded.mentee[0].id_mentee == req.params.id) return ERROR(res, 403, "id request doesnt match with id mentee");
+        if(req.decoded.mentee[0].id_mentee != req.params.id) return ERROR(res, 403, "id request doesnt match with id mentee");
+
         getMentee(req.params.id, (error, result) => {
             if(error) return ERROR(res, 500, error);
             if(result.length == 0) return ERROR(res, 404, "account doesn't exist");
@@ -87,7 +89,8 @@ module.exports = {
         });
     },
     updateAccount: (req, res) => {
-        if(!req.decoded.mentee[0].id_mentee == req.params.id) return ERROR(res, 403, "id request doesnt match with id mentee");
+        if(req.decoded.mentee[0].id_mentee != req.params.id) return ERROR(res, 403, "id request doesnt match with id mentee");
+        
         req.body.id_mentee = req.params.id;
         updateMentee(req.body, (error, result) => {
             if(error) return ERROR(res, 500, error);
