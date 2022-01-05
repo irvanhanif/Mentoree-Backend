@@ -78,13 +78,11 @@ module.exports = {
     },
     updateMentee: (req, callback) => {
         connection.query(
-            `UPDATE ${tablename} SET nama = $2, email = $3, password = $4, status = $5
+            `UPDATE ${tablename} SET nama = $2, status = $3
             WHERE id_mentee = $1 RETURNING *`,
             [
                 req.id_mentee,
                 req.nama,
-                req.email,
-                req.password,
                 req.status
             ],
             (error, result) => {
