@@ -162,13 +162,13 @@ module.exports = {
         verify(tokens, process.env.KEYAPP, {algorithms: "HS256"}, (error, decoded) => {
             if(error) return ERROR(res, 500, error);
             
-            if(!decoded.mentee[0].id_mentee) return ERROR(res, 500, "Account is not Mentee");
+            if(!decoded.mentee.id_mentee) return ERROR(res, 500, "Account is not Mentee");
             if(!decoded.active) return ERROR(res, 500, "Not from mentoree API");
-            ActivateAccount(decoded.mentee[0].id_mentee, (errors, results) => {
+            ActivateAccount(decoded.mentee.id_mentee, (errors, results) => {
                 if(errors) return ERROR(res, 500, errors);
                 
                 if(!results) return ERROR(res, 500, "Something wrong when activate accoung");
-                getMentee(decoded.mentee[0].id_mentee, (errors1, results1) => {
+                getMentee(decoded.mentee.id_mentee, (errors1, results1) => {
                     if(errors1) return ERROR(res, 500, errors1);
 
                     delete results1[0].password;
