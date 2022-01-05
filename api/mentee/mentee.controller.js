@@ -51,7 +51,7 @@ module.exports = {
                     
                     delete results[0].code;
                     delete results[0].kode;
-                    token = sign({mentee: results}, process.env.KEY, {algorithm: "HS256", expiresIn: "20m"});
+                    token = sign({mentee: results}, process.env.KEYAPP, {algorithm: "HS256", expiresIn: "20m"});
                     return SUCCESS(res, 200, {id: results[0].id_mentee, token: token});
                 });
             });
@@ -67,7 +67,7 @@ module.exports = {
 
             delete result[0].password;
             delete result[0].kode;
-            token = sign({mentee: result}, process.env.KEY, {algorithm: "HS256", expiresIn: "24h"});
+            token = sign({mentee: result}, process.env.KEYAPP, {algorithm: "HS256", expiresIn: "24h"});
             return SUCCESS(res, 200, {token: token});
         });
     },
@@ -94,7 +94,7 @@ module.exports = {
                 
                 delete result[0].password;
                 delete result[0].kode;
-                token = sign({mentee: results}, process.env.KEY, {algorithm: "HS256", expiresIn: "24h"});
+                token = sign({mentee: results}, process.env.KEYAPP, {algorithm: "HS256", expiresIn: "24h"});
                 return SUCCESS(res, 200, {token: token});
             });
         });
@@ -112,7 +112,7 @@ module.exports = {
                 delete results[0].password;
                 delete results[0].kode;
 
-                token = sign({mentee: result}, process.env.KEY, {algorithm: "HS256", expiresIn: "20m"});
+                token = sign({mentee: result}, process.env.KEYAPP, {algorithm: "HS256", expiresIn: "20m"});
                 return SUCCESS(res, 200, {token: token});
             });
         });
@@ -120,7 +120,7 @@ module.exports = {
     inputCode: (req, res) => {
         let tokens = req.get("authorization");
         tokens = tokens.slice(7);
-        verify(tokens, process.env.KEY, {algorithms: "HS256"}, (error, decoded) => {
+        verify(tokens, process.env.KEYAPP, {algorithms: "HS256"}, (error, decoded) => {
             if(error) return ERROR(res, 500, error);
             
             getMentee(decoded.mentee[0].id_mentee, (errors, result) => {
@@ -137,7 +137,7 @@ module.exports = {
     
                         delete results1[0].password;
                         delete results1[0].kode;
-                        token = sign({mentee: results1}, process.env.KEY, {algorithm: "HS256", expiresIn: "24h"});
+                        token = sign({mentee: results1}, process.env.KEYAPP, {algorithm: "HS256", expiresIn: "24h"});
                         return SUCCESS(res, 200, {token: token});
                     });
                 });
@@ -146,7 +146,7 @@ module.exports = {
     },
     inputToken: (req, res) => {
         const tokens = req.params.token;
-        verify(tokens, process.env.KEY, {algorithms: "HS256"}, (error, decoded) => {
+        verify(tokens, process.env.KEYAPP, {algorithms: "HS256"}, (error, decoded) => {
             if(error) return ERROR(res, 500, error);
             
             if(!decoded.mentee[0].id_mentee) return ERROR(res, 500, "Account is not Mentee");
@@ -160,7 +160,7 @@ module.exports = {
 
                     delete results1[0].password;
                     delete results1[0].kode;
-                    token = sign({mentee: results1}, process.env.KEY, {algorithm: "HS256", expiresIn: "24h"});
+                    token = sign({mentee: results1}, process.env.KEYAPP, {algorithm: "HS256", expiresIn: "24h"});
                     return SUCCESS(res, 200, {token: token});
                 });
             });
@@ -171,7 +171,7 @@ module.exports = {
         resendToken(decoded.mentee[0], (errors, result) => {
             if(errors) return ERROR(res, 500, errors);
             
-            token = sign({mentee: result}, process.env.KEY, {algorithm: "HS256", expiresIn: "20m"});
+            token = sign({mentee: result}, process.env.KEYAPP, {algorithm: "HS256", expiresIn: "20m"});
             return SUCCESS(res, 200, {token: token});
         });
     }

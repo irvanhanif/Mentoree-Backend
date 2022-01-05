@@ -31,7 +31,7 @@ module.exports = {
                 if(errors) return ERROR(res, 500, errors);
 
                 delete results[0].password;
-                results[0]["token"] = sign({mentor: results}, process.env.KEY, {algorithm: "HS256", expiresIn: "24h"});
+                results[0]["token"] = sign({mentor: results}, process.env.KEYAPP, {algorithm: "HS256", expiresIn: "24h"});
                 return SUCCESS(res, 200, results);
             });
         });
@@ -45,7 +45,7 @@ module.exports = {
             if(!verif) return ERROR(res, 403, "incorrect password");
 
             delete result[0].password;
-            result[0]["token"] = sign({mentor: result}, process.env.KEY, {algorithm: "HS256", expiresIn: "24h"});
+            result[0]["token"] = sign({mentor: result}, process.env.KEYAPP, {algorithm: "HS256", expiresIn: "24h"});
             return SUCCESS(res, 200, result);
         });
     },

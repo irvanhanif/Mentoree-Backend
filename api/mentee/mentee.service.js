@@ -95,7 +95,7 @@ module.exports = {
         );
     },
     verifAccount: (req, callback) => {
-        const data = sign({mentee: req, active: true}, process.env.KEY, {algorithm: "HS256", expiresIn: "20m"});
+        const data = sign({mentee: req, active: true}, process.env.KEYAPP, {algorithm: "HS256", expiresIn: "20m"});
         const option = {
             from: '"No-Reply Mentoree" <mentoree123@gmail.com>',
             to: req.email,
@@ -120,7 +120,7 @@ module.exports = {
         }
         const codeHash = hashSync(code, salt);
 
-        const data = sign({mentee: req, active: true}, process.env.KEY, {algorithm: "HS256", expiresIn: "20m"});
+        const data = sign({mentee: req, active: true}, process.env.KEYAPP, {algorithm: "HS256", expiresIn: "20m"});
         const option = {
             from: '"No-Reply Mentoree" <mentoree123@gmail.com>',
             to: req.email,
@@ -178,7 +178,7 @@ module.exports = {
  
                 delete result[0].password;
                 delete result[0].kode;
-                const data = sign({mentee: result, active: true}, process.env.KEY, {algorithm: "HS256", expiresIn: "20m"});
+                const data = sign({mentee: result, active: true}, process.env.KEYAPP, {algorithm: "HS256", expiresIn: "20m"});
                 const option = {
                     from: '"No-Reply Mentoree" <mentoree123@gmail.com>',
                     to: result.email,
