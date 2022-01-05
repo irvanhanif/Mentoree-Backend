@@ -54,7 +54,8 @@ module.exports = {
                     delete results[0].code;
                     delete results[0].kode;
                     token = sign({mentee: results}, process.env.KEYAPP, {algorithm: "HS256", expiresIn: "20m"});
-                    return SUCCESS(res, 200, {id: results[0].id_mentee, token: token});
+                    const tokens = sign({id: results[0].id_mentee, token: token}, process.env.KEYAPP, {algorithm: "HS256", expiresIn: "24h"});
+                    return SUCCESS(res, 200, {token: tokens});
                 });
             });
         });
@@ -64,6 +65,7 @@ module.exports = {
             if(error) return ERROR(res, 500, error);
 
             if(result.length == 0) return ERROR(res, 404, "account not found or incorrect email");
+            if(!result[0].active) return ERROR(res, 500, "account isn't active");
             const verif = compareSync(req.body.password, result[0].password);
             if(!verif) return ERROR(res, 403, "incorrect password");
 
@@ -90,7 +92,7 @@ module.exports = {
     },
     updateAccount: (req, res) => {
         if(req.decoded.mentee[0].id_mentee != req.params.id) return ERROR(res, 403, "id request doesnt match with id mentee");
-        
+
         req.body.id_mentee = req.params.id;
         updateMentee(req.body, (error, result) => {
             if(error) return ERROR(res, 500, error);
@@ -129,25 +131,30 @@ module.exports = {
         verify(tokens, process.env.KEYAPP, {algorithms: "HS256"}, (error, decoded) => {
             if(error) return ERROR(res, 500, error);
             
-            getMentee(decoded.mentee[0].id_mentee, (errors, result) => {
-                if(errors1) return ERROR(res, 500, errors);
+            verify(decoded.token, process.env.KEYAPP, {algorithms: "HS256"}, (errors, decodeds) => {
+                if(errors) return ERROR(res, 500, errors);
 
-                const verif = compareSync(req.body.kode, result[0].kode);
-                if(!verif) return ERROR(res, 500, "Code is incorrect");
-                ActivateAccount(decoded.mentee[0].id_mentee, (errors1, results) => {
+                getMentee(decodeds.mentee[0].id_mentee, (errors1, result) => {
                     if(errors1) return ERROR(res, 500, errors1);
-
-                    if(!results) return ERROR(res, 500, "Something wrong when activate accoung");
-                    getMentee(results[0].id_mentee, (errors2, results1) => {
+    
+                    const verif = compareSync(req.body.kode, result[0].kode);
+                    if(!verif) return ERROR(res, 500, "Code is incorrect");
+                    ActivateAccount(decoded.mentee[0].id_mentee, (errors2, results) => {
                         if(errors2) return ERROR(res, 500, errors2);
     
-                        delete results1[0].password;
-                        delete results1[0].kode;
-                        token = sign({mentee: results1}, process.env.KEYAPP, {algorithm: "HS256", expiresIn: "24h"});
-                        return SUCCESS(res, 200, {token: token});
+                        if(!results) return ERROR(res, 500, "Something wrong when activate accoung");
+                        getMentee(results[0].id_mentee, (errors3, results1) => {
+                            if(errors3) return ERROR(res, 500, errors3);
+        
+                            delete results1[0].password;
+                            delete results1[0].kode;
+                            token = sign({mentee: results1}, process.env.KEYAPP, {algorithm: "HS256", expiresIn: "24h"});
+                            return SUCCESS(res, 200, {token: token});
+                        });
                     });
-                });
-            });    
+                });    
+            })
+            
         });
     },
     inputToken: (req, res) => {
@@ -173,12 +180,17 @@ module.exports = {
         });
     },
     resendKodeToken: (req, res) => {
-        const id_mentee = req.params.id;
-        resendToken(decoded.mentee[0], (errors, result) => {
-            if(errors) return ERROR(res, 500, errors);
-            
-            token = sign({mentee: result}, process.env.KEYAPP, {algorithm: "HS256", expiresIn: "20m"});
-            return SUCCESS(res, 200, {token: token});
+        let tokens = req.get("authorization");
+        tokens = tokens.slice(7);
+        verify(tokens, process.env.KEYAPP, {algorithms: "HS256"}, (error, decoded) => {
+            if(error) return ERROR(res, 500, error);
+
+            resendToken(decoded.id, (errors, result) => {
+                if(errors) return ERROR(res, 500, errors);
+                
+                token = sign({mentee: result}, process.env.KEYAPP, {algorithm: "HS256", expiresIn: "20m"});
+                return SUCCESS(res, 200, {token: token});
+            });
         });
     }
 }
