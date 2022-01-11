@@ -48,6 +48,7 @@ module.exports = {
             (error, result) => {
                 if(error) return callback(error);
 
+                result.code = code
                 return callback(null, result.rows);
             }
         );
