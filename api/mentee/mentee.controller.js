@@ -129,7 +129,7 @@ module.exports = {
             verify(decoded.token, process.env.KEYAPP, {algorithms: "HS256"}, (errors, decodeds) => {
                 if(errors) return ERROR(res, 500, errors);
                 
-                const verif = compareSync(req.body.kode, decoded.mentee[0].kode);
+                const verif = compareSync(req.body.kode, decodeds.mentee[0].kode);
                 if(!verif) return ERROR(res, 500, "Code is incorrect");
                 ActivateAccount(decodeds.mentee[0].id_mentee, (errors2, results) => {
                     if(errors2) return ERROR(res, 500, errors2);
