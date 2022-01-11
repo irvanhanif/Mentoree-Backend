@@ -48,9 +48,7 @@ module.exports = {
             (error, result) => {
                 if(error) return callback(error);
 
-                result = result.rows;
-                result[0].code = code;
-                return callback(null, result);
+                return callback(null, result.rows);
             }
         );
     },
@@ -139,7 +137,7 @@ module.exports = {
                     if(errors) return callback(errors);
 
                     if(results.response.length == 0) return ERROR(res, 500, "Something wrong when send email");
-                    return callback(null, result);
+                    return callback(null, req);
                 });
             }
         );
@@ -173,15 +171,13 @@ module.exports = {
             ],
             (error, result) => {
                 if(error) return callback(error);
- 
-                delete result[0].password;
-                delete result[0].kode;
-                const data = sign({mentee: result, active: true}, process.env.KEYAPP, {algorithm: "HS256", expiresIn: "20m"});
+                
+                const data = sign({mentee: req, active: true}, process.env.KEYAPP, {algorithm: "HS256", expiresIn: "20m"});
                 const option = {
                     from: '"No-Reply Mentoree" <mentoree123@gmail.com>',
-                    to: result.email,
+                    to: req.email,
                     subject: "Activate Account",
-                    html: `<h4>hello, ${result.nama}...<h4><br><br>
+                    html: `<h4>hello, ${req.nama}...<h4><br><br>
                     
                     <h4>you have been completed form to create account, and then you can activate your account with input code which are we share to you or just click link and your account is active.<h4><br>
                     <h4>here is your code <b>${code}<b><h4><br> 
@@ -191,9 +187,18 @@ module.exports = {
                     if(errors) return callback(errors);
 
                     if(results.response.length == 0) return ERROR(res, 500, "Something wrong when send email");
-                    return callback(null, result.rows);
+                    return callback(null, req);
                 });
             }
+        );
+    },
+    updatePassword: (req, callback) => {
+        connection.query(
+            `UPDATE ${tablename} SET password = $2 WHERE id_mentee = $1`,
+            [
+                req.id_mentee,
+                req.password
+            ]
         )
     }
 }

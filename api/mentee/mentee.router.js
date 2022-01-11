@@ -14,7 +14,7 @@ router.post('/register/kode', inputCode);
 router.post('/register/token/:token', inputToken)
 router.post('/login', login);
 router.post('/forgotpw', forgotPassword);
-router.post('/resendCode/:id', resendKodeToken);
+router.post('/resendCode', resendKodeToken);
 router.put('/:id', accountToken, menteeToken, updateAccount);
 router.delete('/:id', accountToken, menteeToken, deleteAccount);
 
