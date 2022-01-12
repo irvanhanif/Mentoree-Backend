@@ -123,6 +123,7 @@ module.exports = {
     inputCode: (req, res) => {
         let tokens = req.get("authorization");
         tokens = tokens.slice(7);
+        console.log(token);
         verify(tokens, process.env.KEYAPP, {algorithms: "HS256"}, (error, decoded) => {
             if(error) return ERROR(res, 500, error);
             
