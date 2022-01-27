@@ -142,7 +142,7 @@ module.exports = {
                         delete results1[0].password;
                         delete results1[0].kode;
                         token = sign({mentee: results1}, process.env.KEYAPP, {algorithm: "HS256", expiresIn: "24h"});
-                        return SUCCESS(res, 200, {token: token});
+                        return SUCCESS(res, 200, {data: results1, token: token});
                     });
                 });
             }); 
@@ -165,7 +165,7 @@ module.exports = {
                     delete results1[0].password;
                     delete results1[0].kode;
                     token = sign({mentee: results1}, process.env.KEYAPP, {algorithm: "HS256", expiresIn: "24h"});
-                    return SUCCESS(res, 200, {token: token});
+                    return SUCCESS(res, 200, {data: results1, token: token});
                 });
             });
         });
