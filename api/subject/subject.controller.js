@@ -13,8 +13,11 @@ module.exports = {
     getMentorbySubject: (req, res) => {
         getMentorbyIdSubject(req.params.id, (error, result) => {
             if(error) return ERROR(res, 500, error);
-
             if(result.length == 0) return ERROR(res, 403, "no data available");
+
+            result.forEach(account => {
+                delete account.password;
+            });
             return SUCCESS(res, 200, result);
         })
     }
