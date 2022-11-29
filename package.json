@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js"
+    "start": "node app.js",
+    "seedDB": "knex migrate:latest --knexfile ./api/db/knexfile.js && knex seed:run --knexfile ./api/db/knexfile.js",
+    "refreshDB": "knex migrate:rollback --all --knexfile ./api/db/knexfile.js && knex migrate:latest --knexfile ./api/db/knexfile.js && knex seed:run --knexfile ./api/db/knexfile.js"
   },
   "repository": {
     "type": "git",
@@ -24,8 +26,10 @@
     "express": "^4.17.2",
     "gitignore": "^0.7.0",
     "jsonwebtoken": "^8.5.1",
+    "knex": "^2.3.0",
+    "mysql": "^2.18.1",
+    "mysql2": "^2.3.3",
     "nodemailer": "^6.7.2",
     "pg": "^8.7.1"
-  },
-  "devDependencies": {}
+  }
 }

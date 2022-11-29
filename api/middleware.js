@@ -17,12 +17,12 @@ module.exports = {
         });
     },
     mentorToken: (req, res, next) => {
-        if(!req.decoded.mentor[0].id_mentor) return ERROR(res, 500, "Account is not Mentor");
+        if(!req.decoded.mentor[0].id) return ERROR(res, 500, "Account is not Mentor");
 
         next();
     },
     menteeToken: (req, res, next) => {
-        if(!req.decoded.mentee[0].id_mentee) return ERROR(res, 500, "Account is not Mentee");
+        if(!req.decoded.mentee[0].id) return ERROR(res, 500, "Account is not Mentee");
         
         next();
     }

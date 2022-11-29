@@ -8,7 +8,7 @@ router.get('/', getAllMentor);
 router.get('/:id', getMentor);
 router.post('/register', register);
 router.post('/login', login);
-router.put('/:id', updateAccount);
-router.delete('/:id', deleteAccount);
+router.put('/:id', accountToken, mentorToken, updateAccount);
+router.delete('/:id', accountToken, mentorToken, deleteAccount);
 
 module.exports = router;
